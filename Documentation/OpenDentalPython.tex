@@ -1,0 +1,202 @@
+\documentclass[10pt,a4paper]{article}
+\usepackage[latin1]{inputenc}
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{amssymb}
+\usepackage{amsthm}
+\usepackage{graphicx}
+\begin{document}
+
+\topskip0pt
+\vspace*{\fill}
+This document is a attempt explain the use of the OpenDental module for the Python language. This library while far from complete should help organize smaller projects by allowing a more pythonic work flow. In my opinion OpenDental does not store its data in a coherent or logical way and thus I have had trouble in the past navigating it's maze of unimplemented foreign keys, undocumented tables and overall messy architecture. This is one frustrated programmers attempt to remedy that.
+
+A best effort has been made to standardize the output of this module. Most of the time strings and integers are returned, for things where this is not possible a list is returned that can be iterated though. When no data is contained in a row I attempt to return False. This should allow you to write code that is dependent on if data is actually stored in the row more easily, and will intentionally break things that are dependant on having correct data.
+
+I have also attempted to add extensive error logging to the project. As OpenDental updates their databases this should allow you to more easily fix any errors that may arise, also it should help fix any errors I might of inadvertently made. 
+
+This module also depends on the MySql library for Python. It would be possible to substitute a module of your choice but that might add considerable coding to your project. 
+
+Finally I would like to thank you for using this module. This is my first contribution to the open source community and I am proud to now be a novice member of such a auspicious group. It was this communities guides and work that has gotten me here and I will open source as many projects as possible in future. May this find you in a good health, and good luck.
+
+-Will Cipriano
+\vspace{\fill}
+%
+\clearpage 
+
+
+\begin{center}
+The patient object is intended to return all the details regarding a patient and his or her account. OpenDental uses a number of foreign keys so it does not make this easy. This object should make it easier to code for OpenDental databases. 
+
+
+\bf Syntax: Patient = GetPatientDetails(\it Patient Number \it )
+\end{center}
+
+\begin{description}
+\item[LastName] Last name.
+\item[FirstName] First name.
+\item[MiddleInitial] Middle initial.
+\item[PreferredName] Preferred name, or nick name.
+\item[Status] Patient, Non-Patient, Inactive, Archived, Deleted, Deceased, or Prospective.
+\item[Gender] Male, Female, or Unknown
+\item[MaritalStatus] Single, Married, Child, Widowed, or Divorced.
+\item[Birthday] Birthday represented in Datetime.date format.
+\item[Age] Current age in years.
+\item[SocialSecurityNumber] 9 digits in the US, will return something else in other countries
+\item[Address] First line of the address.
+\item[Address2] Second line of the address.
+\item[City] City name.
+\item[State] 2 characters in the US.
+\item[PostalCode] 5 digits in the US. 
+\item[HomePhone] Returns a list with 3 parts (Area Code), (Exchange), (Subscriber Number). May also contain country code if it is a international number.
+\item[WorkPhone] Same as HomePhone.
+\item[CellPhone] Same as HomePhone.
+\item[Guarantor] Patient ID of the head of household. 
+\item[Credit] Single Character, Displayed in the upper right hand corner of OpenDental. They suggest using A,B,C etc to indicate credit worthiness. 
+\item[Email] Email Address.
+\item[Salutation] First name override to be used in OpenDental's patient commutations, if this isn't used it then attempts to use PreferredName and if that doesn't exist it uses FirstName. 
+\item[IndividualBalance] Current individual patient balance. Always returns a integer. (does not include family)
+\item[PrimaryProvider] The first name, last name and middle initial(if present) of the primary provider listed for the patient.
+\item[PrimaryProviderSpeciality] General Dentist, Hygienist, Endodontist, Pediatrician, Periodontist, Prosthodontist, Orthodontist, Denturist, Oral Surgeon, Assistant, Lab Technician, Pathologist, Public Health Specialist, or Radiologist. (simply returns Dentist for undefined variables) 
+\item[PrimaryProviderSuffix] Usually DMD or DDS. 
+\item[SecondaryProvider] See PrimaryProvider.
+\item[SecondaryProviderSpeciality] See PrimaryProviderSpeciality.
+\item[SecondaryProviderSuffix] See PrimaryProviderSuffix.
+\item[FeeSchedule] Description of Fee Schedule. 
+\item[BillingType] Type of billing to be done.
+\item[ImageFolder] Name of the image folder.
+\item[PatientPicturesCategory] This is the definition number that tells you what image is the patients picture.
+\item[Image] Filename of the patient image.
+\item[ContactNote] Notes that are in reference to the patients contact details (namely address and telephone number)
+\item[FinancialNote] Notes regarding fiscal details.
+\item[MedicalNote] Notes of a urgent medical nature.
+\item[ApptModNote] Notes regarding appointments. (or notes that appear on the appointment module)
+\item[StudentStatus] Nonstudent, Part Time, or Full Time
+\item[School] College Name.
+\item[Chart] Chart number, for referencing older programs.
+\item[MedicaidID] Medcaid ID number. Arkansas is 10 digits long, Louisiana is 13.
+\item[30DayBalance] Balance of all procedures unpaid in the last 30 days for the entire family.
+\item[60DayBalance] Balance of all procedures unpaid from 31 to 60 days ago for the entire family.
+\item[90DayBalance] Balance of all procedures unpaid from 61 to 90 days ago for the entire family.
+\item[90DayPlusBalance] Balance of all procedures unpaid from over 90 days ago for the entire family.
+\item[Balance] Total balance for this patient's account. (not to be confused with IndividualBalance, this tracks a patient's family as well)
+\item[Employer] Name of patient's employer.
+\item[EmployerAddress] Address of patient's employer.
+\item[EmployerAddress2] Second line of patient's employers address.
+\item[EmployerCity] City of patients employer.
+\item[EmployerState] State of patients employer.
+\item[EmployerPostalCode] Postal code of patient's employer.
+\item[EmployerPhone] Phone number of patient's employer.
+\item[EmployerNumber] OpenDental's employer identifier.
+\item[Race] Unknown, Multiracial, Hispanic/Latino, African American, Caucasian, Hawaiian or Pacific Islander, Native American, Asian, Other, Aboriginal, Black Hispanic
+\item[County] Patient's county.
+\item[Grade] 1 - 12, Prenatal, Prekindergarten, Kindergarten, Other
+\item[FirstVisit] Date of first visit.
+\item[HasInsurance] True or False.
+\item[Premedicated] True if patient needs to be medicated before hand.
+\item[ScheduleBefore] Time to schedule appointments before.
+\item[ScheduleAfter] Time to schedule appointments after.
+\item[ScheduleDay] Day of week to set appointments. (not normally used by OpenDental)
+\item[Language] Patients primary language.
+\item[AdmissionDate] The date the patient was admitted. (Hospitals only use this)
+\item[title] Mr., Miss., Dr., etc. (entered manually by end user)
+\item[PayPlanDueDate] The date the pay plan is due.
+\item[Site] OpenDental's site identifier.
+\item[SiteDescription] Description of the site.
+\item[SiteNote] Note about the site.
+\item[LastEdit] The last time this row was edited.
+\item[DeciderName] Name of the person in charge of this patients medical decisions.
+\item[Decider] OpenDental's ID number for this patient's responsible party(decider).
+\item[DeciderAddress] Address of the decider.
+\item[DeciderAddress2] 2nd line of decider's address.
+\item[DeciderCity] City where the decider resides.
+\item[DeciderState] State where the decider lives.
+\item[DeciderPostalCode] Postal code of the decider.
+\item[DeciderHomePhone] Home number of the decider.
+\item[DeciderWorkPhone] Work number of the decider.
+\item[DeciderCellPhone] Cell phone of the decider.
+\item[DeciderEmail] Email of the decider.
+\item[CEcode] 'Canadian Eligibility Code'. Returns 
+Full Time Student, Disabled, Disabled Student, Not Applicable
+\item[ArriveEarly] Number of minutes asked to arrive early.
+\item[ContactConfidential] None Specified, Do Not Call, Home Phone, Work Phone, Cell Phone, Email, Check Notes, Postal Mail, or Text Message.
+\item[Guarantor] OpenDental's ID number for this patient's guarantor.
+\item[GuarantorAddress] Address of the guarantor.
+\item[GuarantorAddress2] 2nd line of guarantor's address.
+\item[GuarantorCity] City where the guarantor resides.
+\item[GuarantorState] State where the guarantor lives.
+\item[GuarantorPostalCode] Postal code of the guarantor.
+\item[GuarantorHomePhone] Home number of the guarantor.
+\item[GuarantorWorkPhone] Work number of the guarantor.
+\item[GuarantorCellPhone] Cell phone of the guarantor.
+\item[GuarantorEmail] Email of the guarantor.
+\item[TextMessage] Returns True, False, or Unknown if patient wants to receive text messages.
+
+\begin{center}
+All of the items prefaced with Procedure will return lists. Example ProcedureDate[3] will relate to ProcedureAppointNumber[3].
+\end{center}
+
+\item[ProcedureDate] Returns a list of Datetimes. Should be the date the procedure is planned or completed.
+\item[ProcedureAppointmentNumber] This is the appointment that this procedure was completed or is scheduled to be completed.
+\item[ProcedureFee] The fee that is to be changed.
+\item[ProcedureSurface] The surfaces treated.
+\item[ProcedureToothNumber] The tooth that is treated.
+\item[ProcedureProviderNumber] The provider number of the provider who treated the patient.
+\item[ProcedureDiagnosis] This procedure's diagnosis.
+\item[ProcedureDateCompleted] The date the procedure was marked as complete.
+\item[ProcedureStatement] The statement number of a particular procedure.
+\item[ProcdedureLocked] Returns True or False.
+\item[ProcedureChanged] A datetime of the last time this row was changed.
+\item[ProcedureToothRange] The range of teeth effected
+\item[ProcedureStatus] Treatment Plan, Complete, Existing Current Provider, Existing Current Provider, Referred Out, Deleted, or Condition.
+\item[ProcedureNumber] OpenDental's procedure identifier. 
+\item[ProcedureCodeNumber] OpenDental's code for this procedure. 
+\item[ProcedureMedicalCode] AMA's code for this procedure.
+\item[ProcedureDescription] Description of the procedure.
+\item[ProcedureAbbreviatedDescription] Abbreviated description of the procedure.
+\item[ProcedureLaymenTerm] The procedure description in layman's terms.
+\item[ProcedureCategoryNumber] OpenDental's procedure category identifier. Annoyingly not to be confused with the actual insurance category.
+  
+
+\begin{center}
+All items prefaced with Appointment will return lists in the same manner as Procedures. Also the number 1 can be replaced with 2 to get the second insurance carrier information.
+\end{center}
+
+\item[AppointmentDate] The date of the appointment. 
+\item[AppointmentStatus] Scheduled, Complete, Not Scheduled, As Soon As Possible, Broken, Planned, See Note, or Completed/See Note.
+\item[AppointmentNumber] OpenDental's appointment identifier. 
+\item[AppointmentInsurance1num] The number of the insurance carrier in OpenDental.
+\item[AppointmentInsurance1type] Percentage, PPO Percentage, Flat, Capitation. 
+\item[AppointmentCopayFeeSchedule1] Copay fee schedule number.
+\item[AppointmentFeeSchedule1] Fee schedule number.
+
+\begin{center}
+Claims just like procedures and appointments return lists. 
+\end{center}
+
+\item[ClaimNumber] OpenDental's claim identifier.
+\item[ClaimProcedureNumber] Procedure code for this claim.
+\item[ClaimInsurancePercentage] The percentage that insurance will pay on this claim.
+\item[ClaimCopayAmount] The patient's co-pay for this claim
+\item[ClaimCopayAmountOverride] Overrides the current copay in substitution for this number.
+\item[ClaimDeductible] Deductible for this claim. 
+
+\begin{center}
+The CategoryNumberLookup() function allows you to take a medical code from a procedure and lookup what insurance category it belongs to. It will return a dictionary with the following items.  
+\end{center} 
+\item[Description] A textual description of the category.
+\item[DefaultPercentage] Default covered by insurance
+\item[Order] The order these are displayed in OpenDental.
+\item[BenefitCategoryNumber] OpenDentals benefit category identifier.
+\item[BenefitCategory] None, General, Diagnostic, Periodontics, Restorative, Endodontics, Maxillofacial Prosthetics, Crowns, Accident, Orthodontics, Prosthodontics, Oral Surgery, Routine Preventive, Diagnostic X-Ray, or Adjunctive. 
+
+\begin{center}
+The PrimaryPlanLookup() function returns the primary insurance plan of a patient. OpenDental stores this data in a somewhat ambiguous way in the appointments table but this allows easier access. 
+
+
+\bf Syntax: PatientInsurance = PrimaryPlanLookup(\it Patient Number \it ) 
+\end{center} 
+
+\end{description}
+
+\end{document}
