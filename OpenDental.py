@@ -1,4 +1,5 @@
 #Imports
+import os
 import MySQLdb
 import MySQLdb.cursors
 from datetime import date
@@ -10,14 +11,16 @@ import string
 #Globals
 cur = ""
 today = date.today()
-errorreporting = sys.path[0] + '\DatabaseErrors.log'
-config = sys.path[0] + '\OpenDentalDatabaseConfig.ini'
+path = os.path.dirname(__file__).replace('\\library.zip','')
+config = path + '\OpenDentalDatabaseConfig.ini'
+errorreporting = path + '\DatabaseErrors.ini'
+databaseinfo = []
 
 #Database connection uses the file located at config to load credentials. 
 def DatabaseConnection():   
     global cur
     global errorreporting
-    global config
+    global config  
     try:
         config = open(config, 'r')
     except Exception as ex:
@@ -35,6 +38,7 @@ def DatabaseConnection():
         Password = config[3].split('\n')[0]
         Password = Password[1:]
         DatabaseName = config[4][1:]
+        databaseinfo = [Host, Username, Password, DatabaseName]
     except Exception as ex:
         errorlog = open(errorreporting, 'a')
         errorlog.write('\n Config File Syntax Error: ' + str(ex) + ' on line ' + format(sys.exc_info()[-1].tb_lineno))
@@ -1248,18 +1252,36 @@ def BenefitPercentageLookup(Type,Insurance):
         return False
 
 def PrimaryPlanLookup(PatNum):
-    try:        
-        cur.execute("SELECT * FROM patplan WHERE PatNum =" + str(PatNum))
-        Plan = cur.fetchone()
-        if (Plan):
-            cur.execute("SELECT * FROM inssub WHERE InsSubNum =" + str(Plan['InsSubNum']))
+    if (PatNum != ""):
+        try:        
+            cur.execute("SELECT * FROM patplan WHERE PatNum =" + str(PatNum))
             Plan = cur.fetchone()
-            return Plan['PlanNum']
-        else:
-            return 0
-    except Exception as ex:
-        errorlog = open(errorreporting, 'a')
-        errorlog.write('\n Patient Insurance Plan Lookup Error: ' + str(ex) + ' on line ' + format(sys.exc_info()[-1].tb_lineno))
-        errorlog.close()
+            if (Plan):
+                cur.execute("SELECT * FROM inssub WHERE InsSubNum =" + str(Plan['InsSubNum']))
+                Plan = cur.fetchone()
+                return Plan['PlanNum']
+            else:
+                return 0
+        except Exception as ex:
+            errorlog = open(errorreporting, 'a')
+            errorlog.write('\n Patient Insurance Plan Lookup Error: ' + str(ex) + ' on line ' + format(sys.exc_info()[-1].tb_lineno))
+            errorlog.close()
+            return False
+    else:
         return False
+
+def CreateUser(number = 9223372036854775807, name = "", group = 1, employee = 0, clinic = 0, provider = 0, hidden = 0, popups = 0, password = 1, restricted = 0, tasklist=0):
+    user = [number, name, group, employee, clinic, provider, hidden, popups, password, restricted]
+    print len(user)
+    try:
+        cur.execute("INSERT INTO userod "
+                    "(UserNum, UserName, UserGroupNum, EmployeeNum, ClinicNum, ProvNum, IsHidden, DefaultHidePopups, PasswordIsStrong, ClinicIsRestricted, TaskListInBox)"
+                    " VALUES ('%i','%s','%i','%i','%i','%i','%i','%i','%i','%i','%i')" % (number, name, group, employee, clinic, provider, hidden, popups, password, restricted, tasklist))
+        return True
+    except Exception as ex:
+            errorlog = open(errorreporting, 'a')
+            errorlog.write('\n User Creation Error: ' + str(ex) + ' on line ' + format(sys.exc_info()[-1].tb_lineno))
+            errorlog.close()
+            return False
+
 
