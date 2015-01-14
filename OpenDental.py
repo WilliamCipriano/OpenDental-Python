@@ -59,6 +59,26 @@ def DatabaseConnection():
         return False
         
     return True
+
+def DefineDatabase(Host,Username,Password,DatabaseName):
+    global cur
+    global errorreporting
+    global config
+
+    try:
+        Database = MySQLdb.connect(host=Host,
+                                   user=Username,
+                                   passwd=Password,
+                                   db=DatabaseName,
+                                   cursorclass=MySQLdb.cursors.DictCursor)
+        cur = Database.cursor()
+    except Exception as ex:
+        errorlog = open(errorreporting, 'a')
+        errorlog.write('\n MySql Connection Error: ' + str(ex) + ' on line ' + format(sys.exc_info()[-1].tb_lineno))
+        errorlog.close()
+        return False
+
+    return True
    
 
 def GetPatientDetails(PatNum):
@@ -1284,4 +1304,11 @@ def CreateUser(number = 9223372036854775807, name = "", group = 1, employee = 0,
             errorlog.close()
             return False
 
+def deleteattachedclaims(procedure = 0):
+    if (procedure != 0):
+        cur.execute("SELECT ProcNum, ClaimNum FROM claimproc WHERE ProcNum =" + str(procedure))
+        claimnumber = cur.fetchone()
+        cur.execute("DELETE from claimproc WHERE ClaimNum =" + str(claimnumber['ClaimNum']))
+        cur.execute("DELETE from claim WHERE ClaimNum =" + str(claimnumber['ClaimNum']))
+        return True
 
