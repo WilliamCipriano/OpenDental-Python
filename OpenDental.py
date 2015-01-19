@@ -10,11 +10,11 @@ import string
 
 #Globals
 cur = ""
-today = date.today()
 path = os.path.dirname(__file__).replace('\\library.zip','')
 config = path + '\OpenDentalDatabaseConfig.ini'
 errorreporting = path + '\DatabaseErrors.ini'
 databaseinfo = []
+WRITE = True
 
 #Database connection uses the file located at config to load credentials. 
 def DatabaseConnection():   
@@ -79,11 +79,13 @@ def DefineDatabase(Host,Username,Password,DatabaseName):
         return False
 
     return True
+
+
    
 
 def GetPatientDetails(PatNum):
     global today
-    global errorreporting   
+    global errorreporting
     try:
         global cur
         PatData = {}
@@ -103,7 +105,7 @@ def GetPatientDetails(PatNum):
         if (row['MiddleI'] != ''):
             PatData['MiddleInitial'] = row['MiddleI']
         else:
-            PatData['MiddleInital'] = False
+            PatData['MiddleInitial'] = False
 #Nick Name        
         if (row['Preferred'] != ''):
             PatData['PreferredName'] = row['Preferred']
@@ -150,13 +152,11 @@ def GetPatientDetails(PatNum):
             PatData['MaritalStatus'] = 'Divorced'
         else:
             PatDate['MaritalStatus'] = False
-#Birthday and Age            
+#Birthday
         if (row['Birthdate'] != ''):
             PatData['Birthday'] = row['Birthdate']
-            PatData['Age'] = today.year - PatData['Birthday'].year - ((today.month, today.day) < (PatData['Birthday'].month, PatData['Birthday'].day))
         else:
             PatData['Birthday'] = False
-            PatData['Age'] = False
 #Social Security Number
         if (row['SSN'] != ''):    
             PatData['SocialSecurityNumber'] = row['SSN']
@@ -237,6 +237,8 @@ def GetPatientDetails(PatNum):
                     PatData['PrimaryProvider'] = prov['FName'] + " " + prov['MI'] + ". " + prov['LName']
                 else:
                     PatData['PrimaryProvider'] = prov['FName'] + " " + prov['LName']
+                if PatData['PrimaryProvider'] == "Default L. Provider":
+                    PatData['PrimaryProvider'] = False
             except Exception as ex:
                 errorlog = open(errorreporting, 'a')
                 errorlog.write('\n Patient Provider Lookup Error: ' + str(ex) + ' on line ' + format(sys.exc_info()[-1].tb_lineno))
@@ -479,7 +481,7 @@ def GetPatientDetails(PatNum):
                 PatData['EmployerCity'] = employer['City']
                 PatData['EmployerState'] = employer['State']
                 PatData['EmployerZip'] = employer['Zip']
-                PatData['EmployerPhone'] = re.findall(r'\w+',employer['Phone'])
+                PatData['EmployerPhone'] = re.findall(r'\w+', employer['Phone'])
                 PatData['EmployerNumber'] = row['EmployerNum']
             except Exception as ex:
                 errorlog = open(errorreporting, 'a')
@@ -502,32 +504,32 @@ def GetPatientDetails(PatNum):
             PatData['EmployerZip'] = False
             PatData['EmployerPhone'] = False
 #Race
-            if (row['Race'] != False):
-                if (row['Race'] == 0):
-                    PatData['Race'] = 'Unknown'
-                elif (row['Race'] == 1):
-                    PatData['Race'] = 'Multiracial'
-                elif (row['Race'] == 2):
-                    PatData['Race'] = 'Hispanic/Latino'
-                elif (row['Race'] == 3):
-                    PatData['Race'] = 'African American'
-                elif (row['Race'] == 4):
-                    PatData['Race'] = 'Caucasian'
-                elif (row['Race'] == 5):
-                    PatData['Race'] = 'Hawaiian or Pacific Islander'
-                elif (row['Race'] == 6):
-                    PatData['Race'] = 'Native American'
-                elif (row['Race'] == 7):
-                    PatData['Race'] = 'Asian'
-                elif (row['Race'] == 8):
-                    PatData['Race'] = 'Other'
-                elif (row['Race'] == 9):
-                    PatData['Race'] = 'Aboriginal'
-                elif (row['Race'] == 10):
-                    PatData['Race'] = 'Black Hispanic'
-                else:
-                    PatData['Race'] = row['Race']
+        if (row['Race'] != ''):
+            if (row['Race'] == 0):
+                PatData['Race'] = 'Unknown'
+            elif (row['Race'] == 1):
+                PatData['Race'] = 'Multiracial'
+            elif (row['Race'] == 2):
+                PatData['Race'] = 'Hispanic/Latino'
+            elif (row['Race'] == 3):
+                PatData['Race'] = 'African American'
+            elif (row['Race'] == 4):
+                PatData['Race'] = 'Caucasian'
+            elif (row['Race'] == 5):
+                PatData['Race'] = 'Hawaiian or Pacific Islander'
+            elif (row['Race'] == 6):
+                PatData['Race'] = 'Native American'
+            elif (row['Race'] == 7):
+                PatData['Race'] = 'Asian'
+            elif (row['Race'] == 8):
+                PatData['Race'] = 'Other'
+            elif (row['Race'] == 9):
+                PatData['Race'] = 'Aboriginal'
+            elif (row['Race'] == 10):
+                PatData['Race'] = 'Black Hispanic'
             else:
+                PatData['Race'] = row['Race']
+        else:
                 PatData['Race'] = False
 #County
         if (row['County'] != ''):
@@ -546,6 +548,8 @@ def GetPatientDetails(PatNum):
                 PatData['Grade'] = 'Other'
             else:
                 PatData['Grade'] = row['GradeLevel']
+        else:
+            PatData['Grade'] = False
 #Date of first vist
         if (row['DateFirstVisit'] != ''):
             PatData['FirstVisit'] = row['DateFirstVisit']
@@ -605,7 +609,7 @@ def GetPatientDetails(PatNum):
         if (row['PreferRecallMethod'] != ''):
             if (row['PreferRecallMethod'] == 0):
                 PatData['RecallMethod'] = 'None Specified'
-            elif (row['PreferRecalltMethod'] == 1):
+            elif (row['PreferRecallMethod'] == 1):
                 PatData['RecallMethod'] = 'Do Not Call'
             elif (row['PreferRecallMethod'] == 2):
                 PatData['RecallMethod'] = 'Home Phone'
@@ -646,7 +650,7 @@ def GetPatientDetails(PatNum):
         elif (row['Language'] == ''):
             PatData['Language'] = False
         else:
-            PatData['PrimaryLanguage'] = row['Language']
+            PatData['Language'] = row['Language']
 #Admit Date
         if (row['AdmitDate'] != ''):
             PatData['AdmissionDate'] = row['AdmitDate']
@@ -834,7 +838,7 @@ def GetPatientDetails(PatNum):
         
      
         try:
-            cur.execute("SELECT * FROM procedurelog WHERE PatNum = " + PatNum)
+            cur.execute("SELECT * FROM procedurelog WHERE PatNum = " + str(PatNum))
             CompletedProcs = cur.fetchall()
             for CompletedProcs in CompletedProcs:
                 if (CompletedProcs['ProcDate'] != ''):
@@ -985,7 +989,7 @@ def GetPatientDetails(PatNum):
         PatData['AppointmentFeeSchedule2'] = []
                
         try:
-            cur.execute("SELECT * FROM appointment WHERE PatNum = " + PatNum)
+            cur.execute("SELECT * FROM appointment WHERE PatNum = " + str(PatNum))
             Appointments = cur.fetchall()
             for Appointment in Appointments:
                 if (Appointment['AptDateTime'] != ''):
@@ -1291,24 +1295,81 @@ def PrimaryPlanLookup(PatNum):
         return False
 
 def CreateUser(number = 9223372036854775807, name = "", group = 1, employee = 0, clinic = 0, provider = 0, hidden = 0, popups = 0, password = 1, restricted = 0, tasklist=0):
-    user = [number, name, group, employee, clinic, provider, hidden, popups, password, restricted]
-    print len(user)
-    try:
-        cur.execute("INSERT INTO userod "
-                    "(UserNum, UserName, UserGroupNum, EmployeeNum, ClinicNum, ProvNum, IsHidden, DefaultHidePopups, PasswordIsStrong, ClinicIsRestricted, TaskListInBox)"
-                    " VALUES ('%i','%s','%i','%i','%i','%i','%i','%i','%i','%i','%i')" % (number, name, group, employee, clinic, provider, hidden, popups, password, restricted, tasklist))
-        return True
-    except Exception as ex:
-            errorlog = open(errorreporting, 'a')
-            errorlog.write('\n User Creation Error: ' + str(ex) + ' on line ' + format(sys.exc_info()[-1].tb_lineno))
-            errorlog.close()
-            return False
+    global WRITE
+    if WRITE:
+        user = [number, name, group, employee, clinic, provider, hidden, popups, password, restricted]
+        print len(user)
+        try:
+            cur.execute("INSERT INTO userod "
+                        "(UserNum, UserName, UserGroupNum, EmployeeNum, ClinicNum, ProvNum, IsHidden, DefaultHidePopups, PasswordIsStrong, ClinicIsRestricted, TaskListInBox)"
+                        " VALUES ('%i','%s','%i','%i','%i','%i','%i','%i','%i','%i','%i')" % (number, name, group, employee, clinic, provider, hidden, popups, password, restricted, tasklist))
+            return True
+        except Exception as ex:
+                errorlog = open(errorreporting, 'a')
+                errorlog.write('\n User Creation Error: ' + str(ex) + ' on line ' + format(sys.exc_info()[-1].tb_lineno))
+                errorlog.close()
+                return False
+
 
 def deleteattachedclaims(procedure = 0):
-    if (procedure != 0):
-        cur.execute("SELECT ProcNum, ClaimNum FROM claimproc WHERE ProcNum =" + str(procedure))
-        claimnumber = cur.fetchone()
-        cur.execute("DELETE from claimproc WHERE ClaimNum =" + str(claimnumber['ClaimNum']))
-        cur.execute("DELETE from claim WHERE ClaimNum =" + str(claimnumber['ClaimNum']))
-        return True
+    global WRITE
+    if WRITE:
+        if (procedure != 0):
+            cur.execute("SELECT ProcNum, ClaimNum FROM claimproc WHERE ProcNum =" + str(procedure))
+            claimnumber = cur.fetchone()
+            cur.execute("DELETE from claimproc WHERE ClaimNum =" + str(claimnumber['ClaimNum']))
+            cur.execute("DELETE from claim WHERE ClaimNum =" + str(claimnumber['ClaimNum']))
+            return True
 
+
+def patientnamesearch(searchstring):
+    def num_there(s):
+        return any(i.isdigit() for i in s)
+    if num_there(searchstring):
+        totaldigits = sum(c.isdigit() for c in searchstring)
+        output = []
+        if totaldigits >= 3 and totaldigits <= 5:
+            cur.execute("SELECT PatNum, FName FROM patient WHERE Zip = '" + searchstring + "' LIMIT 50")
+            output.extend(cur.fetchall())
+            cur.execute("SELECT PatNum, FName FROM patient WHERE Address LIKE '" + searchstring + "%' LIMIT 50")
+            output.extend(cur.fetchall())
+
+        if totaldigits >= 4 and totaldigits <= 10:
+            cur.execute("SELECT PatNum, FName FROM patient WHERE SSN LIKE '%" + searchstring + "%' LIMIT 50")
+            output.extend(cur.fetchall())
+
+        if totaldigits >= 6 and totaldigits <= 10:
+            phoneformat = "(" + searchstring[:3] + ")" + searchstring[3:6] + "-" + searchstring[6:]
+            cur.execute("SELECT PatNum, FName FROM patient WHERE HmPhone LIKE '%" + phoneformat + "%' OR WkPhone LIKE '%" + phoneformat + "%' OR WirelessPhone LIKE '%" + phoneformat + "%'")
+            output.extend(cur.fetchall())
+
+        return output
+
+    if ' ' in searchstring:
+        try:
+            fullname = searchstring.split()
+
+            output = []
+            cur.execute("SELECT PatNum, FName FROM patient WHERE LName like '%" + fullname[0] + "%'")
+            output.extend(cur.fetchall())
+            cur.execute("SELECT PatNum, FName FROM patient WHERE FName like '%" + fullname[0] + "%'")
+            output.extend(cur.fetchall())
+
+            cur.execute("SELECT PatNum, FName FROM patient WHERE LName like '%" + fullname[1] + "%'")
+            output.extend(cur.fetchall())
+            cur.execute("SELECT PatNum, FName FROM patient WHERE FName like '%" + fullname[1] + "%'")
+            output.extend(cur.fetchall())
+
+            if len(output) > 0:
+                return output
+        except Exception as ex:
+            pass
+
+
+    if len(searchstring) >= 1:
+        cur.execute("SELECT PatNum, FName FROM patient WHERE LName LIKE '%" + searchstring + "%' OR FName LIKE '%" + searchstring + "%' ORDER BY PatNum LIMIT 30")
+        output = cur.fetchall()
+        if len(output) > 0:
+            return output
+        else:
+            return False
